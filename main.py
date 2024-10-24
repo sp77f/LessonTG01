@@ -1,19 +1,22 @@
 import asyncio
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher, F ,types
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message
+from aiogram.types import Message, FSInputFile
 from config import TOKEN
 import random
 import requests
+from googletrans import Translator , LANGUAGES
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+translator = Translator()
 
 @dp.message(F.photo)
 async def react_photo(message: Message):
-    list = ['Непонятно, что это такое','Ого, какая фотка!','Не отправляй мне такое больше']
+    list = ['Непонятно, что это такое, но я сохраню','Ого, какая фотка! Я сохраню!','Не отправляй мне такое больше, но я сохраню']
     rand_answ = random.choice(list)
     await message.answer(rand_answ)
+    await bot.download(message.photo[-1], destination=f'img/{message.photo[-1].file_id}.jpg')
 
 @dp.message(Command('photo'))
 async def photo(message: Message):
@@ -28,7 +31,7 @@ async def help(message: Message):
     await message.answer('Этот бот умеет выполнять команды:\n/start - приветствие \n/help - помощь  \n/weather - погода в Москве')
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
-    await message.answer('Приветствую вас! Я бот')
+    await message.answer(f'Приветствую {message.from_user.first_name},')
 
 @dp.message(F.text == "что такое ИИ?")
 async def aitext(message: Message):
@@ -42,7 +45,16 @@ async def get_weather(message: Message):
     response = requests.get(url).json()
     await message.answer(f'Температура в городе {city} {response["main"]["temp"]} C \n погода : {response["weather"][0]["description"]}')
 
-
+@dp.message(Command('voice'))
+async def voice(message: Message):
+    voice = FSInputFile('woman.ogg')
+    await message.answer_voice(voice)
+@dp.message()
+async def any(message: Message):
+    user_text = message.text
+    trans = translator.translate(user_text, dest='en')
+    print(trans.text)
+    await message.reply(trans.text)
 async def main():
     await dp.start_polling(bot)
 
