@@ -1,11 +1,12 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F ,types
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message, FSInputFile
+from aiogram.types import Message, FSInputFile, CallbackQuery
 from config import TOKEN
 import random
 import requests
 from googletrans import Translator , LANGUAGES
+import keyboards as kb
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -26,13 +27,31 @@ async def photo(message: Message):
             ]
     rand_photo = random.choice(list)
     await message.answer_photo(photo=rand_photo, caption='Это супер крутая картинка')
+
+@dp.message(F.text == "Помощь")
+async def test_b(message: Message):
+    await message.answer('Обработка кнопки Помощь')
+
+@dp.callback_query(F.data == 'hi_text')
+async def news(call: types.CallbackQuery):
+    await call.message.answer('Привет, ' + call.from_user.first_name+ '!')
+
+@dp.callback_query(F.data == 'bye_text')
+async def news(call: types.CallbackQuery):
+    await call.message.answer('Пока, ' + call.from_user.first_name + '!')
 @dp.message(Command('help'))
 async def help(message: Message):
     await message.answer('Этот бот умеет выполнять команды:\n/start - приветствие \n/help - помощь  \n/weather - погода в Москве')
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
-    await message.answer(f'Приветствую {message.from_user.first_name},')
+    await message.answer(f'Выберите команду ! ',reply_markup=kb.main)
 
+@dp.message(F.text == "Привет")
+async def hitext(message: Message):
+    await message.answer(f'Привет, {message.from_user.first_name} !')
+@dp.message(F.text == "Пока")
+async def hitext(message: Message):
+    await message.answer(f'Пока, {message.from_user.first_name} !')
 @dp.message(F.text == "что такое ИИ?")
 async def aitext(message: Message):
     await message.answer('Искусственный интеллект — это свойство искусственных интеллектуальных систем выполнять творческие функции, которые традиционно считаются прерогативой человека; наука и технология создания интеллектуальных машин, особенно интеллектуальных компьютерных программ')
