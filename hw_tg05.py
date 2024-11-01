@@ -21,7 +21,7 @@ async def help(message: Message):
                          'Также введя любое слово русском языке вы получите его перевод на французский')
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
-    await message.answer(f'Привет ! Это забавный для подбора картинок для ответов Да или Нет ',reply_markup=kb.main)
+    await message.answer(f'Привет ! Это забавный бот для подбора картинок для ответов Да или Нет ',reply_markup=kb.main)
 
 @dp.message(F.text == "Да")
 async def hitext(message: Message):
